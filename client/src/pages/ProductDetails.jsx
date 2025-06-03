@@ -1,13 +1,32 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import products from "../data/products";
+import { fetchProductById } from "../api/products";
 import ReviewList from "../components/ReviewList";
 import ReviewForm from "../components/ReviewForm";
-import ShareButton from '../components/ShareButton';
+import ShareButton from "../components/ShareButton";
 
 function ProductDetails() {
   const { id } = useParams();
-  const product = products.find((p) => p.id === id.toString());
+  const [product, setProduct] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [selectedImage, setSelectedImage] = useState("");
+
+  useEffect(() => {
+    fetchProductById(id)
+      .then((data) => {
+        setProduct(data);
+        setReviews(data.reviews || []);
+        setSelectedImage(data.images[0]);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch product", err);
+        setProduct(null);
+      });
+  }, [id]);
+
+  const handleAddReview = (review) => {
+    setReviews([review, ...reviews]);
+  };
 
   if (!product) {
     return (
@@ -16,13 +35,6 @@ function ProductDetails() {
       </div>
     );
   }
-
-  const [reviews, setReviews] = useState(product.reviews || []);
-  const [selectedImage, setSelectedImage] = useState(product.images[0]);
-
-  const handleAddReview = (review) => {
-    setReviews([review, ...reviews]);
-  };
 
   return (
     <div className="max-w-6xl mx-auto p-6 grid md:grid-cols-2 gap-10">
@@ -33,7 +45,6 @@ function ProductDetails() {
           alt={product.name}
           className="w-full h-auto rounded-xl shadow-md"
         />
-
         <div className="flex gap-4 mt-4">
           {product.images.map((img, index) => (
             <img

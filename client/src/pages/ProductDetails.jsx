@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { fetchProductById } from "../api/products";
+import { fetchReviewsByProductId } from "../api/reviews";
 import ReviewList from "../components/ReviewList";
 import ReviewForm from "../components/ReviewForm";
 import ShareButton from "../components/ShareButton";
@@ -15,12 +16,19 @@ function ProductDetails() {
     fetchProductById(id)
       .then((data) => {
         setProduct(data);
-        setReviews(data.reviews || []);
         setSelectedImage(data.images[0]);
       })
       .catch((err) => {
         console.error("Failed to fetch product", err);
         setProduct(null);
+      });
+
+    fetchReviewsByProductId(id)
+      .then((fetchedReviews) => {
+        setReviews(fetchedReviews);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch reviews", err);
       });
   }, [id]);
 
@@ -43,8 +51,9 @@ function ProductDetails() {
         <img
           src={selectedImage}
           alt={product.name}
-          className="w-full h-auto rounded-xl shadow-md"
+          className="w-full aspect-[4/3] object-cover rounded-xl shadow-md"
         />
+
         <div className="flex gap-4 mt-4">
           {product.images.map((img, index) => (
             <img
@@ -52,19 +61,19 @@ function ProductDetails() {
               src={img}
               alt={`Thumbnail ${index}`}
               onClick={() => setSelectedImage(img)}
-              className={`w-20 h-20 object-cover rounded-lg cursor-pointer border-2 ${
-                selectedImage === img ? "border-pink-500" : "border-transparent"
-              }`}
+              className={`w-20 h-20 object-cover rounded-lg cursor-pointer border-2 transition hover:scale-105 ${selectedImage === img ? "border-pink-500" : "border-transparent"
+                }`}
             />
           ))}
         </div>
+
       </div>
 
       {/* RIGHT: PRODUCT INFO */}
       <div>
         <h1 className="text-3xl font-bold">{product.name}</h1>
         <p className="text-gray-700 mt-2">{product.description}</p>
-        <p className="text-pink-600 text-xl font-semibold mt-4">${product.price}</p>
+        <p className="text-pink-600 text-xl font-semibold mt-4">₹{product.price}</p>
 
         <div className="mt-4">
           <label className="block text-sm font-medium text-gray-700">Select Size:</label>

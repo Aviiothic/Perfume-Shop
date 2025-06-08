@@ -10,14 +10,11 @@ dotenv.config();
 connectDB();
 
 const app = express();
-const corsOptions = {
-  origin: 'https://5173-firebase-perfumeshop-1748926666302.cluster-73qgvk7hjjadkrjeyexca5ivva.cloudworkstations.dev', // frontend origin
-  credentials: true,
-};
 
-app.use(cors(corsOptions));
-
-
+// 🔓 Public CORS - allows all origins
+app.use(cors({
+  origin: '*',
+}));
 
 app.use(express.json());
 
